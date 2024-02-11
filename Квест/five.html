@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гра на відповідь</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    body {
+        
+        color: #fff;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        width: 100%;
+        height: 100vh;
+        
+        background: linear-gradient(220deg, #000080, #00008b, #006400, #00008b, #000080);
+
+
+        background-size: 300% 300%;
+        animation: move-bg 13s linear infinite;
+    }
+
+@keyframes move-bg {
+    0%{
+        background-position: 0% 50%;
+    }
+    50%{
+        background-position: 100% 50%;
+    }
+    100%{
+        background-position: 0% 50%;
+    }
+}
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+
+    #question {
+        font-size: 24px;
+        margin-bottom: 20px;
+        position: relative;
+    z-index: 2;
+    }
+
+    #answer {
+        padding: 12px 24px;
+        font-size: 20px;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #000;
+        margin-bottom: 20px;
+        width: 300px;
+        margin-top: 20px; /* Відступ між зображенням і стрічкою введення */
+        position: relative;
+    z-index: 2;
+    }
+
+    #answer::placeholder {
+        color: #999;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+         position: relative;
+    z-index: 2;
+    }
+
+    .button {
+        padding: 12px 24px;
+        font-size: 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        background-color: transparent;
+        color: #fff;
+        border: 2px solid #4CAF50;
+        transition-duration: 0.4s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        overflow: hidden;
+
+        position: relative;
+    z-index: 2;
+    }
+
+    .button:hover {
+        background-color: #4CAF50;
+        border: 2px solid #4CAF50;
+    }
+
+    .button:after {
+        content: "";
+        background: #f1f1f1;
+        display: block;
+        position: absolute;
+        z-index: -1;
+        transition: all 0.3s ease-out;
+    }
+
+
+    svg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .wave {
+        animation: wave 10s linear infinite alternate-reverse;
+        fill: #ff7e5f;
+    }
+
+
+.wave {
+    position: relative;
+    z-index: 1; /* Встановлюємо менший z-index для хвилі */
+}
+
+    @keyframes wave {
+        0% {
+            transform: translateY(-5px);
+        }
+        100% {
+            transform: translateY(5px);
+        }
+    }
+
+    .applause {
+    position: absolute;
+    font-size: 30px; /* Розмір емодзі оплесків */
+    animation: moveApplause 5s linear forwards; /* Анімація руху оплесків */
+}
+
+@keyframes moveApplause {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100vh); } /* Рухаємо вгору на висоту екрану */
+}
+
+   
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Гра-квест</h1>
+        <div id="question"></div>
+        <img src="" id="questionImage" alt="Питання">
+        <input type="text" id="answer" placeholder="Введіть вашу відповідь">
+        <button class="button" onclick="checkAnswer()">
+            <i class="fas fa-check"></i> Перевірити
+        </button>
+        <button class="button" onclick="displayQuestion()">
+            <i class="fas fa-sync-alt"></i> Згенерувати питання
+        </button>
+        <div id="result"></div>
+    </div>
+
+    <div id="applauseContainer"></div>
+
+    <script>
+        const questions = [
+            { question: "1. Напишіть номер стрічки коду, де присутня помилка.", answer: "16", image: "img/Зображення1.png" },
+
+            { question: "2. Напишіть номер стрічки коду, де присутня помилка.", answer: "1", image: "img/Зображення2.png" },
+            { question: "3. Напишіть номер стрічки коду, де присутня помилка.", answer: "13", image: "img/Зображення3.png" },
+            { question: "4. Напишіть номер стрічки коду, де присутня помилка.", answer: "14", image: "img/Зображення4.png" },
+            { question: "5. Напишіть номер стрічки коду, де присутня помилка.", answer: "3", image: "img/Зображення5.png" },
+            { question: "6. Напишіть номер стрічки коду, де присутня помилка.", answer: "11", image: "img/Зображення6.png" }
+
+        ];
+
+
+        function getRandomQuestion() {
+            return questions[Math.floor(Math.random() * questions.length)];
+        }
+
+        function displayQuestion() {
+            const question = getRandomQuestion();
+            document.getElementById("question").textContent = question.question;
+            document.getElementById("questionImage").src = question.image;
+            document.getElementById("answer").value = "";
+            document.getElementById("result").textContent = "";
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+            const question = document.getElementById("question").textContent;
+            const correctAnswer = questions.find(q => q.question === question).answer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+    var applauseContainer = document.getElementById("applauseContainer");
+    
+    for (var i = 0; i < 50; i++) { // Створюємо 50 оплесків
+        var applause = document.createElement("span");
+        applause.className = "applause";
+        applause.innerHTML = String.fromCodePoint(0x1F44F); // Emoji для оплесків
+        applauseContainer.appendChild(applause);
+        
+        var randomX = Math.random() * window.innerWidth; // Випадкове розташування по ширині вікна
+        var randomY = Math.random() * window.innerHeight; // Випадкове розташування по висоті вікна
+        
+        applause.style.left = randomX + "px";
+        applause.style.top = randomY + "px";
+    }
+    
+    // Видалення оплесків після завершення анімації
+    applauseContainer.addEventListener("animationend", function(event) {
+        if (event.target.classList.contains("applause")) {
+            event.target.remove();
+        }
+    });
+
+    // Показати повідомлення після закінчення анімації оплесків
+    setTimeout(function() {
+        alert("Правильна відповідь! Вітаємо ви виграли цей квест.");
+    }, 2000); // Затримка у 2 секунди перед відображенням повідомлення
+} else {
+    document.getElementById("result").textContent = "Неправильно! Спробуйте інше завдання.";
+    document.getElementById("result").className = "incorrect";
+}
+
+
+        }
+
+        window.onload = function() {
+            displayQuestion();
+        };
+    </script>
+</body>
+</html>

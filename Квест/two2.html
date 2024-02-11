@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гра на відповідь</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    #pageIndicator {
+        position: fixed;
+        bottom: 20px; /* Змініть це значення, якщо потрібно */
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        z-index: 9999; /* Збільште z-index, якщо потрібно, щоб забезпечити відображення над іншими елементами */
+    }
+    body {
+        color: #fff;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        width: 100%;
+        height: 100vh;
+        background: linear-gradient(220deg, #000080, #150058, #000000, #150058, #000080);
+
+
+        background-size: 300% 300%;
+        animation: move-bg 13s linear infinite;
+    }
+
+    @keyframes move-bg {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+
+    #question {
+        font-size: 24px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    #answer {
+        padding: 12px 24px;
+        font-size: 20px;
+        border: 2px solid #fff;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #000;
+        margin-bottom: 20px;
+        width: 300px;
+        position: relative;
+        z-index: 2;
+    }
+
+    #answer::placeholder {
+        color: #999;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        position: relative;
+        z-index: 2;
+    }
+
+    .button {
+        padding: 12px 24px;
+        font-size: 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        background-color: transparent;
+        color: #fff;
+        border: 2px solid #4CAF50;
+        transition-duration: 0.4s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+    }
+
+    .button:hover {
+        background-color: #4CAF50;
+        border: 2px solid #4CAF50;
+    }
+
+    .button:after {
+        content: "";
+        background: #f1f1f1;
+        display: block;
+        position: absolute;
+        z-index: -1;
+        transition: all 0.3s ease-out;
+    }
+
+    svg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .wave {
+        animation: wave 10s linear infinite alternate-reverse;
+        fill: #ff7e5f;
+    }
+
+    .wave {
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes wave {
+        0% {
+            transform: translateY(-5px);
+        }
+        100% {
+            transform: translateY(5px);
+        }
+    }
+
+    .applause {
+        position: absolute;
+        font-size: 30px;
+        animation: moveApplause 5s linear forwards;
+    }
+
+    @keyframes moveApplause {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-100vh);
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Гра-квест</h1>
+        <div id="question"></div>
+        <div id="answers">
+            <button class="button" onclick="checkAnswer(this)"></button>
+            <button class="button" onclick="checkAnswer(this)"></button>
+            <button class="button" onclick="checkAnswer(this)"></button>
+            <button class="button" onclick="checkAnswer(this)"></button>
+        </div>
+        <div id="result"></div>
+        <button class="button" id="newQuestionButton" onclick="displayQuestion()" style="display: none;">Згенерувати інше завдання</button>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Знайдіть зайве:", answers: ["мишка", "принтер", "сканер", "міді-клавіатура"], correctAnswer: "принтер" },
+            { question: "Назвіть найменшу одиницю вимірювання інформації", answers: ["байт", "кілобайт", "гігабайт", "біт"], correctAnswer: "біт" },
+            { question: "До зовнішньої пам'яті належать:", answers: ["оптичний диск", "постійна пам'ять", "оперативна пам'ять", "флеш-пам'ять"], correctAnswer: "флеш-пам'ять" },
+            { question: "Продуктивність роботи комп'ютера (швидкість виконання операцій) залежить від", answers: ["тактової частоти процесора", "обсягу відеопам'яті", "розміру екрана монітора", "напруги живлення"], correctAnswer: "тактової частоти процесора" },
+            { question: "Оперативна пам'ять призначена для:", answers: ["тимчасового зберігання даних", "постійного зберігання даних", "для оперативного зберігання даних", "немає правильної відповіді"], correctAnswer: "тимчасового зберігання даних" },
+            { question: "Види пам'яті:", answers: ["постійна і оперативна", "флешка, диск, вінчестер", "внутрішня і зовнішня", "внутрішня, зовнішня і кеш"], correctAnswer: "внутрішня і зовнішня" },
+            { question: "Що відноситься до внутрішньої пам'яті:", answers: ["оперативна", "оптичний диск", "вінчестер", "флеш-пам'ять"], correctAnswer: "оперативна" },
+            { question: "Звідки зникають дані після вимкнення живлення комп'ютера?", answers: ["з постійної пам'яті", "з флеш-пам'яті", "з оперативної пам'яті", "немає правильної відповіді"], correctAnswer: "з оперативної пам'яті" },
+            { question: "Монітор працює під управлінням", answers: ["оперативної пам'яті", "звукової карти", "відеокарти", "моніторної пам'яті"], correctAnswer: "відеокарти" },
+            { question: "До пристроїв введення належить:", answers: ["мікрофон", "принтер", "навушники", "колонки"], correctAnswer: "мікрофон" },
+            { question: "До пристроїв виведення належить:", answers: ["принтер", "сканер", "миша", "камера"], correctAnswer: "принтер" },
+            { question: "Пристрій опрацювання даних в комп'ютері - це", answers: ["материнська плата", "оперативна плата", "процесор", "монітор"], correctAnswer: "процесор" },
+            { question: "0, 1, 2, 3, 4, 5, 6, 7, 8, 9 це цифри якого коду?", answers: ["двійкового", "десяткового", "вісімкового", "бітного"], correctAnswer: "десяткового" },
+            { question: "Тактова частота – основна характеристика …", answers: ["жорсткого диска", "блоку живлення", "монітора", "процесора"], correctAnswer: "процесора" }
+        
+        ];
+
+        function getRandomQuestion() {
+            return questions[Math.floor(Math.random() * questions.length)];
+        }
+
+        function displayQuestion() {
+            const question = getRandomQuestion();
+            document.getElementById("question").textContent = question.question;
+            const answersDiv = document.getElementById("answers");
+            const buttons = answersDiv.querySelectorAll('.button');
+            question.answers.forEach((answer, index) => {
+                buttons[index].textContent = answer;
+            });
+            document.getElementById("result").textContent = "";
+            document.getElementById("newQuestionButton").style.display = "none"; // Приховати кнопку
+        }
+
+        function checkAnswer(button) {
+            const userAnswer = button.textContent.trim().toLowerCase();
+            const question = document.getElementById("question").textContent;
+            const correctAnswer = questions.find(q => q.question === question).correctAnswer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                alert("Правильна відповідь! Наступне завдання тебе чекає в аудиторії: № 110");
+            } else {
+                document.getElementById("result").textContent = "Неправильно. Спробуйте інше завдання.";
+                document.getElementById("result").className = "incorrect";
+                document.getElementById("newQuestionButton").style.display = "block"; // Показати кнопку
+            }
+        }
+
+        
+
+        window.onload = function() {
+            displayQuestion();
+        };
+    </script>
+     <div id="result"></div>
+     <div id="applauseContainer"></div>
+     <div id="pageIndicator">Сторінка 2 з 2</div>
+ </body>
+ 
+</html>
